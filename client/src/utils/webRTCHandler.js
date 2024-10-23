@@ -6,10 +6,11 @@ import Peer from "simple-peer";
 
 const defaultConstraints = {
   audio: true,
-  video: {
-    width: "480",
-    height: "360",
-  },
+  video: true,
+  // video: {
+  //   width: "480",
+  //   height: "360",
+  // },
 };
 const onlyAudioConstraints = {
   audio: true,
@@ -107,6 +108,7 @@ export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
     wss.signalPeerData(signalData);
   });
 
+  //sending messages using data channel
   peers[connUserSocketId].on("data", (data) => {
     const messageData = JSON.parse(data);
     appendNewMessage(messageData);
@@ -147,57 +149,65 @@ export const removePeerConnection = (data) => {
 
 //NOTE: using vanilla js coz more generic
 const showLocalVideoPreview = (stream) => {
-  const videosContainer = document.getElementById("videos_portal");
-  videosContainer.classList.add("videos_portal_styles");
-  const videoContainer = document.createElement("div");
-  videoContainer.classList.add("video_track_container");
+  //HACK: videos_portal_styles===video_call_container
+  // const videosContainer = document.querySelector(".video_call_container");
+  //video_track_container===main_video_wrapper
+  //videosContainer.classList.add("videos_portal_styles");
+  //const videoContainer = document.createElement("div");
+  const videoContainer = document.querySelector(".main-video-wrapper");
   const videoElement = document.createElement("video");
   videoElement.autoplay = true;
   videoElement.muted = true;
   videoElement.srcObject = stream;
-
   videoElement.onloadedmetadata = () => {
     videoElement.play();
   };
-
   videoContainer.appendChild(videoElement);
 
   // if (appStore.getState().connectOnlyWithAudio) {
   //   videoContainer.appendChild(getAudioOnlyLabel());
   // }
 
-  videosContainer.appendChild(videoContainer);
+  //videosContainer.appendChild(videoContainer);
 };
 
 const addStream = (stream, connUserSocketId) => {
-  const videosContainer = document.getElementById("videos_portal");
   // HACK:
   // const videoContainer = document.createElement("div");
   // videoContainer.id = connUserSocketId;
   // videoContainer.classList.add("video_track_container");
-  const videoContainer = document.querySelector(".video_track_container");
+  const videosContainer = document.querySelector(".side-videos-wrapper");
+  const videoContainer = document.createElement("div");
+  videoContainer.id = connUserSocketId;
+  videoContainer.classList.add("side-video-wrapper");
   const videoElement = document.createElement("video");
   videoElement.autoplay = true;
   videoElement.srcObject = stream;
   videoElement.classList.add("vid");
   videoElement.id = `${connUserSocketId}-video`;
-
   videoElement.onloadedmetadata = () => {
     videoElement.play();
   };
 
   videoElement.addEventListener("click", () => {
-    if (videoElement.classList.contains("full_screen")) {
-      //FIX: fix styling
-      //new videocontainer with class video_track_container is getting created for each new user
-      videoElement.classList.remove("full_screen");
-    } else {
-      videoElement.classList.add("full_screen");
-    }
+    // if (videoElement.classList.contains("full_screen")) {
+    //   videoElement.classList.remove("full_screen");
+    // } else {
+    //   videoElement.classList.add("full_screen");
+    // }
+    // Swap the clicked side video with the main video
+    const mainVideo = document
+      .querySelector(".main-video-wrapper")
+      .querySelector("video");
+    const tempSrcObject = videoElement.srcObject;
+    videoElement.srcObject = mainVideo.srcObject;
+    mainVideo.srcObject = tempSrcObject;
+    mainVideo.onloadedmetadata = () => {
+      mainVideo.play();
+    };
   });
-
   videoContainer.appendChild(videoElement);
-  //videosContainer.appendChild(videoContainer);
+  videosContainer.appendChild(videoContainer);
 };
 
 //////////////Buttons////////////
