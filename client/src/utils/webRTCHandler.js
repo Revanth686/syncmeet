@@ -1,5 +1,5 @@
 //all webrtc related logic
-import { setShowOverlay } from "../store/RoomSlice";
+import { setMessages, setShowOverlay } from "../store/RoomSlice";
 import appStore from "../store/store";
 import * as wss from "./wss";
 import Peer from "simple-peer";
@@ -73,19 +73,19 @@ const getConfiguration = () => {
   //   };
   // }
 };
+const messengerChannel = "messenger";
 /*called if new user joined our room*/
 export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
   console.log(
     `preparing connection with ${connUserSocketId} hostSide ${!isInitiator}`,
   );
   const configuration = getConfiguration();
-
   // === newRTCPeerConnection()
   peers[connUserSocketId] = new Peer({
     initiator: isInitiator,
     config: configuration,
     stream: localStream,
-    // channelName: messengerChannel,
+    channelName: messengerChannel,
   });
 
   // === peerConnection.on('track',()=>{})
@@ -105,6 +105,11 @@ export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
     };
 
     wss.signalPeerData(signalData);
+  });
+
+  peers[connUserSocketId].on("data", (data) => {
+    const messageData = JSON.parse(data);
+    appendNewMessage(messageData);
   });
 };
 
@@ -232,5 +237,34 @@ const switchVideoTracks = (stream) => {
         }
       }
     }
+  }
+};
+
+//////////////////Messages//////////////////////
+
+const appendNewMessage = (messageData) => {
+  const messages = appStore.getState().room.messages;
+  //FIXME: continue from here messages not iterable
+  appStore.dispatch(setMessages([...messages, messageData]));
+};
+
+export const sendMessageUsingDataChannel = (messageContent) => {
+  // append this message locally
+  const identity = appStore.getState().identity;
+  const localMessageData = {
+    content: messageContent,
+    identity,
+    messageCreatedByMe: true,
+  };
+  appendNewMessage(localMessageData);
+
+  const messageData = {
+    content: messageContent,
+    identity,
+  };
+
+  const stringifiedMessageData = JSON.stringify(messageData);
+  for (let socketId in peers) {
+    peers[socketId].send(stringifiedMessageData);
   }
 };
