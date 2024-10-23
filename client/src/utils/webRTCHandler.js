@@ -123,20 +123,16 @@ export const handleSignalingData = (data) => {
 
 export const removePeerConnection = (data) => {
   const { socketId } = data;
-  //const videoContainer = document.getElementById(socketId);
-  const videoContainer = document.querySelector(".video_track_container");
+  const videoContainer = document.getElementById(socketId);
+  // const videoContainer = document.querySelector(".side-video-wrapper");
   const videoEl = document.getElementById(`${socketId}-video`);
 
   if (videoContainer && videoEl) {
     const tracks = videoEl.srcObject.getTracks();
-
     tracks.forEach((t) => t.stop());
-
     videoEl.srcObject = null;
     videoContainer.removeChild(videoEl);
-
-    //HACK: as we altered video styling for fullscreen
-    //videoContainer.parentNode.removeChild(videoContainer);
+    videoContainer.parentNode.removeChild(videoContainer);
 
     if (peers[socketId]) {
       peers[socketId].destroy();
@@ -163,14 +159,19 @@ const showLocalVideoPreview = (stream) => {
     videoElement.play();
   };
   videoContainer.appendChild(videoElement);
+  videoContainer.appendChild(getParticipantOverlay("You"));
 
-  // if (appStore.getState().connectOnlyWithAudio) {
-  //   videoContainer.appendChild(getAudioOnlyLabel());
-  // }
+  if (appStore.getState().room.connectOnlyWithAudio) {
+    videoContainer.appendChild(getAudioOnlyLabel());
+  }
 
   //videosContainer.appendChild(videoContainer);
 };
-
+//TODO: add names on top of video elems of users
+/* <div class="main-video-wrapper"> */
+/*   <video id="main-video" class="video" autoplay muted></video> */
+/*   <div class="participant-name">Main User</div> */
+/* </div> */
 const addStream = (stream, connUserSocketId) => {
   // HACK:
   // const videoContainer = document.createElement("div");
@@ -190,24 +191,57 @@ const addStream = (stream, connUserSocketId) => {
   };
 
   videoElement.addEventListener("click", () => {
-    // if (videoElement.classList.contains("full_screen")) {
-    //   videoElement.classList.remove("full_screen");
-    // } else {
-    //   videoElement.classList.add("full_screen");
-    // }
     // Swap the clicked side video with the main video
     const mainVideo = document
       .querySelector(".main-video-wrapper")
       .querySelector("video");
-    const tempSrcObject = videoElement.srcObject;
-    videoElement.srcObject = mainVideo.srcObject;
-    mainVideo.srcObject = tempSrcObject;
-    mainVideo.onloadedmetadata = () => {
-      mainVideo.play();
-    };
+    const mainVideoParent = document.querySelector(".main-video-wrapper");
+    const sideVideo = videoElement.parentNode;
+    if (videoElement.srcObject && mainVideo.srcObject) {
+      //swap video tracks
+      const tempSrcObject = videoElement.srcObject;
+      videoElement.srcObject = mainVideo.srcObject;
+      mainVideo.srcObject = tempSrcObject;
+      mainVideo.onloadedmetadata = () => {
+        mainVideo.play();
+      };
+      //swap names
+      const mainName =
+        mainVideoParent.querySelector(".participant-name").textContent;
+      const sideName = sideVideo.querySelector(".participant-name").textContent;
+      mainVideoParent.querySelector(".participant-name").textContent = sideName;
+      sideVideo.querySelector(".participant-name").textContent = mainName;
+    }
   });
   videoContainer.appendChild(videoElement);
+  // check if other user connected only with audio
+  const participants = appStore.getState().room.participants;
+  const participant = participants.find((p) => p.socketId === connUserSocketId);
+  if (participant?.onlyAudio) {
+    videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  } else {
+    videoContainer.style.position = "relative";
+  }
+  videoContainer.appendChild(getParticipantOverlay(participant.identity));
   videosContainer.appendChild(videoContainer);
+};
+
+const getAudioOnlyLabel = (identity = "") => {
+  const labelContainer = document.createElement("div");
+  labelContainer.classList.add("label_only_audio_container");
+
+  const label = document.createElement("p");
+  label.classList.add("label_only_audio_text");
+  label.innerHTML = `Only audio ${identity}`;
+
+  labelContainer.appendChild(label);
+  return labelContainer;
+};
+const getParticipantOverlay = (username) => {
+  const overlay = document.createElement("div");
+  overlay.classList.add("participant-name");
+  overlay.innerHTML = username;
+  return overlay;
 };
 
 //////////////Buttons////////////
@@ -254,13 +288,12 @@ const switchVideoTracks = (stream) => {
 
 const appendNewMessage = (messageData) => {
   const messages = appStore.getState().room.messages;
-  //FIXME: continue from here messages not iterable
   appStore.dispatch(setMessages([...messages, messageData]));
 };
 
 export const sendMessageUsingDataChannel = (messageContent) => {
   // append this message locally
-  const identity = appStore.getState().identity;
+  const identity = appStore.getState().room.identity;
   const localMessageData = {
     content: messageContent,
     identity,

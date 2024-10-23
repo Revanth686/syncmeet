@@ -22,11 +22,6 @@ const Message = ({ author, content, sameAuthor, messageCreatedByMe }) => {
 };
 
 const Messages = () => {
-  // const messages = [
-  //   { content: "hey", identity: "Rev", messageCreatedByMe: true },
-  //   { content: "sup", identity: "sundar", messageCreatedByMe: false },
-  //   { content: "howdy", identity: "mark", messageCreatedByMe: false },
-  // ];
   const messages = useSelector((store) => store.room.messages);
   return (
     <div className="messages_container">
