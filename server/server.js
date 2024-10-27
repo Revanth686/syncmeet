@@ -43,7 +43,11 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => {
+const webrtcNamespace = io.of("/webrtc"),
+  editorNamespace = io.of("/editor"),
+  canvasNamespace = io.of("/canvas");
+
+webrtcNamespace.on("connection", (socket) => {
   console.log(`new client connected ${socket.id}`);
 
   socket.on("create-new-room", (data) => {
@@ -112,7 +116,7 @@ const joinRoomHandler = (data, socket) => {
   };
   // join room as user which just is trying to join room passing room id
   const room = rooms.find((room) => room.id === roomId);
-  room.connectedUsers.push(newUser);
+  room?.connectedUsers.push(newUser);
   console.log(`room ${JSON.stringify(room)}`);
 
   socket.join(roomId);
@@ -123,13 +127,15 @@ const joinRoomHandler = (data, socket) => {
 
   room.connectedUsers.forEach((user) => {
     if (user.socketId != socket.id) {
-      io.to(user.socketId).emit("conn-prepare", {
+      webrtcNamespace.to(user.socketId).emit("conn-prepare", {
         connUserSocketId: socket.id,
       });
     }
   });
   //just to update list in participants section
-  io.to(roomId).emit("room-update", { connectedUsers: room.connectedUsers });
+  webrtcNamespace
+    .to(roomId)
+    .emit("room-update", { connectedUsers: room.connectedUsers });
 };
 
 const disconnectHandler = (socket) => {
@@ -144,9 +150,11 @@ const disconnectHandler = (socket) => {
 
     // close the room if amount of the users which will stay in room will be 0
     if (room.connectedUsers.length > 0) {
-      io.to(room.id).emit("user-disconnected", { socketId: socket.id });
+      webrtcNamespace
+        .to(room.id)
+        .emit("user-disconnected", { socketId: socket.id });
 
-      io.to(room.id).emit("room-update", {
+      webrtcNamespace.to(room.id).emit("room-update", {
         connectedUsers: room.connectedUsers,
       });
     } else {
@@ -160,15 +168,81 @@ const signalingHandler = (data, socket) => {
   const { connUserSocketId, signal } = data;
 
   const signalingData = { signal, connUserSocketId: socket.id };
-  io.to(connUserSocketId).emit("conn-signal", signalingData);
+  webrtcNamespace.to(connUserSocketId).emit("conn-signal", signalingData);
 };
 
 const initializeConnectionHandler = (data, socket) => {
   const { connUserSocketId } = data;
 
-  io.to(connUserSocketId).emit("conn-init", { connUserSocketId: socket.id });
+  webrtcNamespace
+    .to(connUserSocketId)
+    .emit("conn-init", { connUserSocketId: socket.id });
 };
 
 server.listen(PORT, () => {
   console.log(`Server is up at port ${PORT}`);
+});
+
+//////////////////////////editor socket endpoints////////////////////////
+const userSocketMap = {};
+function getAllConnectedClients(roomId) {
+  // Map
+  return Array.from(
+    editorNamespace?.sockets?.adapter?.rooms?.get(roomId) || [],
+  ).map((socketId) => {
+    return {
+      socketId,
+      username: userSocketMap[socketId],
+    };
+  });
+}
+editorNamespace.on("connection", (socket) => {
+  console.log(`new editor socket connected ${socket.id}`);
+
+  socket.on("join", ({ roomId, username }) => {
+    userSocketMap[socket.id] = username;
+    socket.join(roomId);
+    const clients = getAllConnectedClients(roomId);
+    console.log(
+      `${socket.id} joined ${roomId} with clients ${JSON.stringify(clients)}`,
+    );
+    // socket.in(roomId).emit(actions.USER_JOINED, { clients, username });
+    clients.forEach(({ socketId }) => {
+      if (socketId != socket.id) {
+        editorNamespace.to(socketId).emit("user-joined", {
+          clients,
+          username,
+          socketId: socket.id,
+        });
+      }
+    });
+  });
+  socket.on("sync-code", ({ code, socketId }) => {
+    console.log(`sync-code to ${socketId} with code ${JSON.stringify(code)}`);
+    editorNamespace.to(socketId).emit("code-change", { code });
+  });
+  socket.on("sync-language", ({ language, socketId }) => {
+    editorNamespace.to(socketId).emit("language-change", { language });
+  });
+  socket.on("sync-output", ({ output, socketId }) => {
+    editorNamespace.to(socketId).emit("output-change", { output });
+  });
+
+  socket.on("code-change", ({ roomId, code }) => {
+    //send to all except the sender
+    socket.in(roomId).emit("code-change", { code });
+  });
+  socket.on("output-change", ({ roomId, output }) => {
+    //send to all except the sender
+    socket.in(roomId).emit("output-change", { output });
+  });
+  socket.on("language-change", ({ roomId, language }) => {
+    //send to all except the sender
+    socket.in(roomId).emit("language-change", { language });
+  });
+});
+
+//////////////////////////canvas namespace////////////////////////
+canvasNamespace.on("connection", (socket) => {
+  console.log(`new canvas socket connected ${socket.id}`);
 });

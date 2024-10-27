@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import * as webRTCHandler from "../utils/webRTCHandler.js";
 import Overlay from "./Overlay.jsx";
 import "./RoomPage.css";
+import EditorPopup from "./Editor/EditorPopup.jsx";
 
 const RoomPage = () => {
   const roomId = useSelector((store) => store.room.roomId);
@@ -37,6 +38,7 @@ const RoomPage = () => {
       <ChatSection />
       <RoomLabel roomId={roomId} />
       {showOverlay && <Overlay />}
+      <EditorPopup />
     </div>
   );
 };

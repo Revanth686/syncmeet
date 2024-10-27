@@ -10,6 +10,7 @@ const roomSlice = createSlice({
     showOverlay: true,
     participants: [],
     messages: [],
+    editorDisplay: "none",
   },
   reducers: {
     setIsRoomHost: (state, action) => {
@@ -33,6 +34,9 @@ const roomSlice = createSlice({
     setMessages: (state, action) => {
       state.messages = action.payload;
     },
+    setEditorDisplay: (state, action) => {
+      state.editorDisplay = action.payload;
+    },
   },
 });
 
@@ -44,5 +48,6 @@ export const {
   setShowOverlay,
   setParticipants,
   setMessages,
+  setEditorDisplay,
 } = roomSlice.actions;
 export default roomSlice.reducer;

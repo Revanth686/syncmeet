@@ -167,7 +167,6 @@ const showLocalVideoPreview = (stream) => {
 
   //videosContainer.appendChild(videoContainer);
 };
-//TODO: add names on top of video elems of users
 /* <div class="main-video-wrapper"> */
 /*   <video id="main-video" class="video" autoplay muted></video> */
 /*   <div class="participant-name">Main User</div> */

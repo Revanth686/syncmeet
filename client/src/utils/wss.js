@@ -6,16 +6,24 @@ import * as webRTCHandler from "./webRTCHandler";
 
 const SERVER = "http://localhost:5000";
 
-let socket = null;
+let socket = null,
+  editorSocket = null,
+  canvasSocket = null;
 
+const initOpts = {
+  "force new connection": true,
+  reconnectionAttempt: "Infinity",
+  timeout: 10000,
+  transports: ["websocket"],
+};
+export const initEditorSocket = () => {
+  return io(`${SERVER}/editor`, initOpts);
+};
+export const initCanvasSocket = () => {
+  return io(`${SERVER}/canvas`, initOpts);
+};
 export const connectWithSocketIOServer = () => {
-  const initOpts = {
-    "force new connection": true,
-    reconnectionAttempt: "Infinity",
-    timeout: 10000,
-    transports: ["websocket"],
-  };
-  socket = io(SERVER, initOpts); //io(`${SERVER}/chat`)
+  socket = io(`${SERVER}/webrtc`, initOpts);
   socket.on("connect", () => {
     console.log("successfully connected with socket io server ", socket.id);
   });
@@ -55,6 +63,13 @@ export const connectWithSocketIOServer = () => {
   socket.on("user-disconnected", (data) => {
     webRTCHandler.removePeerConnection(data);
   });
+
+  // canvasSocket.on("connect", () => {
+  //   console.log(
+  //     "successfully connected with canvas namespace of socket.io server ",
+  //     canvasSocket.id,
+  //   );
+  // });
 };
 
 export const createNewRoom = (identity, onlyAudio) => {
