@@ -3,11 +3,11 @@ import EditorComp from "./components/Editor";
 import { Box } from "@chakra-ui/react";
 import { initEditorSocket } from "../utils/wss";
 import { useCallback } from "react";
+import { useSelector } from "react-redux";
 
-//TODO: receive roomId, username from roomPage
 function EditorApp() {
-  const roomId = "room1",
-    username = "tempUser";
+  const roomId = useSelector((store) => store.room.roomId);
+  const username = useSelector((store) => store.room.identity);
   const socketRef = useRef(null);
   const [socket, setSocket] = useState(null);
   const codeRef = useRef(null);
@@ -23,46 +23,48 @@ function EditorApp() {
   }, []);
   useEffect(() => {
     (async () => {
-      connectEditorSocket();
-      socketRef.current.on("connect", () => {
-        console.log(
-          "successfully connected with editor namespace of socket.io server ",
-          socketRef.current.id,
+      if (roomId) {
+        connectEditorSocket();
+        socketRef.current.on("connect", () => {
+          console.log(
+            "successfully connected with editor namespace of socket.io server ",
+            socketRef.current.id,
+          );
+        });
+
+        socketRef.current?.on("connect_error", (err) => handleErrors(err));
+        socketRef.current?.on("connect_failed", (err) => handleErrors(err));
+        socketRef.current?.on("ERR_CONNECTION_REFUSED", (err) => {
+          handleErrors(err);
+        });
+
+        socketRef.current?.emit("join", { roomId, username });
+        socketRef.current?.on(
+          "user-joined",
+          ({ clients, username, socketId }) => {
+            console.log(`user ${socketId} joined`);
+            socketRef.current?.emit("sync-code", {
+              code: codeRef.current,
+              socketId,
+            });
+            socketRef.current?.emit("sync-output", {
+              output: outputRef.current,
+              socketId,
+            });
+            socketRef.current?.emit("sync-language", {
+              language: languageRef.current,
+              socketId,
+            });
+          },
         );
-      });
-
-      socketRef.current?.on("connect_error", (err) => handleErrors(err));
-      socketRef.current?.on("connect_failed", (err) => handleErrors(err));
-      socketRef.current?.on("ERR_CONNECTION_REFUSED", (err) => {
-        handleErrors(err);
-      });
-
-      socketRef.current?.emit("join", { roomId, username });
-      socketRef.current?.on(
-        "user-joined",
-        ({ clients, username, socketId }) => {
-          console.log(`user ${socketId} joined`);
-          socketRef.current?.emit("sync-code", {
-            code: codeRef.current,
-            socketId,
-          });
-          socketRef.current?.emit("sync-output", {
-            output: outputRef.current,
-            socketId,
-          });
-          socketRef.current?.emit("sync-language", {
-            language: languageRef.current,
-            socketId,
-          });
-        },
-      );
+      }
     })();
     return () => {
       console.log(`disconnecting`);
       socketRef?.current?.disconnect();
       socketRef?.current?.off("user-joined");
     };
-  }, [connectEditorSocket]);
+  }, [connectEditorSocket, roomId]);
   return (
     <>
       {socketRef.current || socket ? (

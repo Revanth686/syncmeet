@@ -50,7 +50,6 @@ const JoinRoomContent = (props) => {
         setErrorMessage("Meeting is full. Please try again later.");
       } else {
         dispatch(setRoomId(roomIdValue));
-        //NOTE: here /room -> /room/:roomId || store in redux store
         navigate("/room");
       }
     } else {

@@ -1,13 +1,12 @@
-import React from "react";
-import { useEffect } from "react";
-import { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Editor from "../../Editor/EditorApp";
+import Canvas from "../../Canvas/CanvasApp";
 
-const EditorPopup = () => {
-  const editorDisplay = useSelector((store) => store.room.editorDisplay);
+const CanvasPopup = () => {
+  const canvasDisplay = useSelector((store) => store.room.canvasDisplay);
   const popupRef = useRef(null);
   const headerRef = useRef(null);
+
   useEffect(() => {
     const header = headerRef.current;
     const popup = popupRef.current;
@@ -46,15 +45,15 @@ const EditorPopup = () => {
       <div
         id="popup"
         className="popup"
-        style={{ display: `${editorDisplay}` }}
+        style={{ display: `${canvasDisplay}` }}
         ref={popupRef}
       >
         <div className="popup-header" ref={headerRef}>
-          <span>Collaborative Component</span>
+          <span>Collaborative canvas Component</span>
           <button id="close-popup">X</button>
         </div>
         <div className="popup-content">
-          <Editor />
+          <Canvas />
           <textarea placeholder=""></textarea>
         </div>
       </div>
@@ -62,4 +61,4 @@ const EditorPopup = () => {
   );
 };
 
-export default EditorPopup;
+export default CanvasPopup;

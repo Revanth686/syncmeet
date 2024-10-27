@@ -8,6 +8,7 @@ import * as webRTCHandler from "../utils/webRTCHandler.js";
 import Overlay from "./Overlay.jsx";
 import "./RoomPage.css";
 import EditorPopup from "./Editor/EditorPopup.jsx";
+import CanvasPopup from "./Canvas/CanvasPopup.jsx";
 
 const RoomPage = () => {
   const roomId = useSelector((store) => store.room.roomId);
@@ -39,6 +40,7 @@ const RoomPage = () => {
       <RoomLabel roomId={roomId} />
       {showOverlay && <Overlay />}
       <EditorPopup />
+      <CanvasPopup />
     </div>
   );
 };

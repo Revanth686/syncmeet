@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import EditorButton from "./EditorButton";
 import CanvasButton from "./CanvasButton";
 
-const VideoButtons = (props) => {
+const VideoButtons = () => {
   // const { connectOnlyWithAudio } = props;
   const connectOnlyWithAudio = useSelector(
     (store) => store.room.connectOnlyWithAudio,
