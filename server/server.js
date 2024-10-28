@@ -203,9 +203,9 @@ editorNamespace.on("connection", (socket) => {
     userSocketMap[socket.id] = username;
     socket.join(roomId);
     const clients = getAllConnectedClients(roomId);
-    console.log(
-      `${socket.id} joined ${roomId} with clients ${JSON.stringify(clients)}`,
-    );
+    // console.log(
+    //   `${socket.id} joined ${roomId} with clients ${JSON.stringify(clients)}`,
+    // );
     // socket.in(roomId).emit(actions.USER_JOINED, { clients, username });
     clients.forEach(({ socketId }) => {
       if (socketId != socket.id) {
@@ -218,7 +218,6 @@ editorNamespace.on("connection", (socket) => {
     });
   });
   socket.on("sync-code", ({ code, socketId }) => {
-    console.log(`sync-code to ${socketId} with code ${JSON.stringify(code)}`);
     editorNamespace.to(socketId).emit("code-change", { code });
   });
   socket.on("sync-language", ({ language, socketId }) => {
@@ -243,6 +242,48 @@ editorNamespace.on("connection", (socket) => {
 });
 
 //////////////////////////canvas namespace////////////////////////
+const canvasUserSocketMap = {};
+function getAllConnectedCanvasClients(roomId) {
+  // Map
+  return Array.from(
+    canvasNamespace?.sockets?.adapter?.rooms?.get(roomId) || [],
+  ).map((socketId) => {
+    return {
+      socketId,
+      username: canvasUserSocketMap[socketId],
+    };
+  });
+}
 canvasNamespace.on("connection", (socket) => {
   console.log(`new canvas socket connected ${socket.id}`);
+
+  socket.on("client-ready", ({ roomId, username }) => {
+    console.log(`recvd client-ready with ${roomId} ${username}`);
+    canvasUserSocketMap[socket.id] = username;
+    socket.join(roomId);
+    const clients = getAllConnectedCanvasClients(roomId);
+    // console.log(
+    //   `${socket.id} emited client-ready with clients ${JSON.stringify(clients)}`,
+    // );
+    // clients.forEach(({ socketId }) => {
+    //   if (socketId != socket.id) {
+    //     canvasNamespace.to(socketId).emit("get-canvas-state");
+    //   }
+    // });
+    socket.broadcast.emit("get-canvas-state");
+  });
+  socket.on("draw-line", ({ prevPoint, currentPoint, color }) => {
+    //emit to everyone excvept sender
+    console.log(`${socket.id} emited draw-line`);
+    socket.broadcast.emit("draw-line", { prevPoint, currentPoint, color });
+  });
+  socket.on("clear-canvas", () => {
+    //io.emit()->emits to each including sender
+    console.log(`${socket.id} emited clear canvas`);
+    canvasNamespace.emit("clear-canvas");
+  });
+  socket.on("canvas-state", (state) => {
+    console.log(`${socket.id} emited canvas-state`);
+    socket.broadcast.emit("canvas-state-from-server", state);
+  });
 });
