@@ -48,13 +48,9 @@ const CanvasPopup = () => {
         style={{ display: `${canvasDisplay}` }}
         ref={popupRef}
       >
-        <div className="popup-header" ref={headerRef}>
-          <span>Collaborative canvas Component</span>
-          <button id="close-popup">X</button>
-        </div>
+        <div className="popup-header" ref={headerRef}></div>
         <div className="popup-content">
           <Canvas />
-          <textarea placeholder=""></textarea>
         </div>
       </div>
     </>

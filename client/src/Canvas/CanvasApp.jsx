@@ -96,11 +96,26 @@ const Canvas = () => {
     };
   }, [canvasRef, roomId]);
 
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const resizeCanvas = () => {
+  //     const rect = canvas.getBoundingClientRect();
+  //     canvas.width = rect.width;
+  //     canvas.height = rect.height;
+  //   };
+  //
+  //   // Initial resize and add resize listener
+  //   resizeCanvas();
+  //   window.addEventListener("resize", resizeCanvas);
+  //
+  //   return () => window.removeEventListener("resize", resizeCanvas);
+  // }, [canvasRef]);
+
   return (
     <>
       {socketRef.current || socket ? (
-        <div className="w-full h-full bg-white flex justify-center items-center">
-          <div className="flex flex-col gap-10 pr-10">
+        <div className="flex flex-row min-w-[300px] w-full h-full min-h-[300px] bg-black justify-center items-center">
+          <div className="flex flex-col gap-4 pr-4">
             <ChromePicker
               color={color}
               onChange={(e) => {
@@ -118,15 +133,17 @@ const Canvas = () => {
               Clear Canvas
             </button>
           </div>
-          <canvas
-            onMouseDown={() => {
-              onMouseDown();
-            }}
-            ref={canvasRef}
-            width={600}
-            height={600}
-            className="border border-black rounded-md "
-          ></canvas>
+          <div className="relative flex-grow h-full w-full overflow-hidden">
+            <canvas
+              onMouseDown={() => {
+                onMouseDown();
+              }}
+              ref={canvasRef}
+              width={600}
+              height={600}
+              className="w-full h-full border border-black rounded-md"
+            ></canvas>
+          </div>
         </div>
       ) : (
         <div>no canvasSocket found</div>

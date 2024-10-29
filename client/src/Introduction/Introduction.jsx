@@ -7,7 +7,7 @@ const Introduction = () => {
   return (
     <div className="introduction_page_container">
       <div className="introduction_page_panel">
-        <img src={"#"} className="introduction_page_image"></img>
+        <img src={logo} className="introduction_page_image"></img>
         <ConnectingButtons />
       </div>
     </div>

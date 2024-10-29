@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useSelector } from "react-redux";
 import Editor from "../../Editor/EditorApp";
+import { ChakraProvider } from "@chakra-ui/react";
+import { theme } from "../../theme";
 
 const EditorPopup = () => {
   const editorDisplay = useSelector((store) => store.room.editorDisplay);
@@ -49,13 +51,11 @@ const EditorPopup = () => {
         style={{ display: `${editorDisplay}` }}
         ref={popupRef}
       >
-        <div className="popup-header" ref={headerRef}>
-          <span>Collaborative Component</span>
-          <button id="close-popup">X</button>
-        </div>
+        <div className="popup-header" ref={headerRef}></div>
         <div className="popup-content">
-          <Editor />
-          <textarea placeholder=""></textarea>
+          <ChakraProvider theme={theme}>
+            <Editor />
+          </ChakraProvider>
         </div>
       </div>
     </>
