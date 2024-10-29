@@ -3,7 +3,6 @@ import { Server } from "socket.io";
 import cors from "cors";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
-import * as twilio from "twilio";
 
 const PORT = process.env.PORT || 5000;
 
