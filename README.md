@@ -32,31 +32,14 @@
    cd syncmeet
    ```
 
-2. Install dependencies for both client and server:
+2. Build and run the application:
 
-   - For the client:
-     ```bash
-     cd client
-     npm install
-     ```
-   - For the server:
-     ```bash
-     cd ../server
-     npm install
-     ```
+   ```bash
+   npm run build
+   npm start
+   ```
 
-3. Run the application:
-
-   - Start the server by navigating to the `server` folder and running:
-     ```bash
-     npm start
-     ```
-   - In a new terminal, navigate to the `client` folder and run:
-     ```bash
-     npm run dev
-     ```
-
-4. Access the app by visiting `http://localhost:5173` in your browser.
+3. Access the app by visiting `http://localhost:5000` in your browser.
 
 ## Usage
 
