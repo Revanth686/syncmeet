@@ -145,11 +145,6 @@ export const removePeerConnection = (data) => {
 
 //NOTE: using vanilla js coz more generic
 const showLocalVideoPreview = (stream) => {
-  //HACK: videos_portal_styles===video_call_container
-  // const videosContainer = document.querySelector(".video_call_container");
-  //video_track_container===main_video_wrapper
-  //videosContainer.classList.add("videos_portal_styles");
-  //const videoContainer = document.createElement("div");
   const videoContainer = document.querySelector(".main-video-wrapper");
   const videoElement = document.createElement("video");
   videoElement.autoplay = true;
@@ -172,10 +167,6 @@ const showLocalVideoPreview = (stream) => {
 /*   <div class="participant-name">Main User</div> */
 /* </div> */
 const addStream = (stream, connUserSocketId) => {
-  // HACK:
-  // const videoContainer = document.createElement("div");
-  // videoContainer.id = connUserSocketId;
-  // videoContainer.classList.add("video_track_container");
   const videosContainer = document.querySelector(".side-videos-wrapper");
   const videoContainer = document.createElement("div");
   videoContainer.id = connUserSocketId;

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./Introduction.css";
-import logo from "../resources/images/logo.png";
+import logo from "../resources/images/logo.jpeg";
 import ConnectingButtons from "./ConnectingButtons";
 
 const Introduction = () => {

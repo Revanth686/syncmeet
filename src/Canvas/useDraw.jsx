@@ -52,7 +52,6 @@ export const useDraw = ({ onDraw }) => {
       canvasRef.current?.removeEventListener("mousemove", handler);
       window.removeEventListener("mouseup", mouseUpHandler);
     };
-    //NOTE: when func is passed as param, it is recreated on every render
   }, [onDraw]);
   return { canvasRef, onMouseDown, clear };
 };

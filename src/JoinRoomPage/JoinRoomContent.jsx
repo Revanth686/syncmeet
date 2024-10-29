@@ -29,7 +29,6 @@ const JoinRoomContent = (props) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
 
-  //HACK:
   const setConnectOnlyWithAudioOpt = (opt) => {
     dispatch(setConnectOnlyWithAudio(opt));
   };

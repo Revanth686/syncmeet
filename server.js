@@ -3,12 +3,23 @@ import { Server } from "socket.io";
 import cors from "cors";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
 const server = http.createServer(app);
 app.use(cors());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static("dist"));
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  next();
+});
 
 let connectedUsers = [];
 let rooms = [];

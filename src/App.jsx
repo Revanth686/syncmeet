@@ -7,7 +7,6 @@ import { useEffect } from "react";
 import { connectWithSocketIOServer } from "./utils/wss";
 
 function App() {
-  //HACK: we can connct with scktSrvr in RoomPage instead of here
   useEffect(() => {
     connectWithSocketIOServer();
   }, []);

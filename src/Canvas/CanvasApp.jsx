@@ -36,7 +36,6 @@ const Canvas = () => {
         );
       });
       const ctx = canvasRef.current?.getContext("2d");
-      //TODO: send roomId to server to join room
       socketRef.current?.emit("client-ready", {
         roomId: roomId,
         username: identity,
@@ -60,7 +59,6 @@ const Canvas = () => {
           // ctx?.drawImage(img, 0, 0);
           (ctx || canvasRef.current?.getContext("2d")).drawImage(img, 0, 0);
         };
-        //FIXME: ctx is undefined
         console.log(
           `received canvas-state-from-server populating screen ${state} ctx ${ctx}`,
         );

@@ -4,7 +4,7 @@ import appStore from "../store/store";
 import { setRoomId, setParticipants } from "../store/RoomSlice";
 import * as webRTCHandler from "./webRTCHandler";
 
-const SERVER = "http://localhost:5000";
+const SERVER = import.meta.env.VITE_APP_BACKEND_URL;
 
 let socket = null,
   editorSocket = null,
@@ -24,6 +24,7 @@ export const initCanvasSocket = () => {
 };
 export const connectWithSocketIOServer = () => {
   socket = io(`${SERVER}/webrtc`, initOpts);
+  console.log(`connecting with socket srvr ${SERVER}`);
   socket.on("connect", () => {
     console.log("successfully connected with socket io server ", socket.id);
   });
