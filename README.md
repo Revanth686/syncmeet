@@ -2,6 +2,12 @@
 
 **SyncMeet** is a powerful, real-time video conferencing application that enables teams to collaborate effortlessly with live video, chat, coding, and drawing tools, all in one place.
 
+## Demo of app
+
+<img src="./assets/syncmeet0.png">
+<img src="./assets/syncmeet1.png">
+<img src="./assets/syncmeet2.png">
+
 ## Features
 
 - **Group Video Conferencing**: Connect with multiple participants over a WebRTC-powered video call in a mesh architecture.
